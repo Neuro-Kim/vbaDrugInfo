@@ -1,0 +1,80 @@
+Option Explicit
+
+
+Sub DrugList()
+    Columns("A:D").Select
+    Selection.ClearContents
+        Range("A1").Select
+    Application.CutCopyMode = False
+    ' declare the variables
+    Dim ieObj As InternetExplorer
+    Dim htmlEle As IHTMLElement
+    Dim i As Integer
+    Dim txtURL As String
+    txtURL = InputBox("Enter DrugInfo URL", "DrugInfo URL")
+    If txtURL = "" Then Exit Sub
+    ' initialize i to one
+    ' create and get access to an instance of IE
+    Set ieObj = New InternetExplorer
+    ieObj.Visible = True
+    ieObj.navigate txtURL
+    ' give the webpage some time to load all content
+    Application.Wait Now + TimeValue("00:00:03")
+' loop through all the rows in the table
+' On Error Resume Next
+i = 1
+    For Each htmlEle In ieObj.document.getElementsByClassName("font_b")
+        With ActiveSheet
+            .Range("A" & i).Value = htmlEle.innerText
+        End With
+        i = i + 1
+    Next htmlEle
+ i = 1
+    For Each htmlEle In ieObj.document.getElementsByClassName("ingredient-list actDiv1 valIngredient")
+        With ActiveSheet
+            .Range("B" & i).Value = htmlEle.innerText
+        End With
+        i = i + 1
+    Next htmlEle
+i = 1
+    For Each htmlEle In ieObj.document.getElementsByClassName("actDiv1 valUsage")
+        With ActiveSheet
+            .Range("C" & i).Value = htmlEle.innerText
+        End With
+        i = i + 1
+    Next htmlEle
+
+    For Each htmlEle In ieObj.document.getElementsByClassName("spanRequestComplete")
+        With ActiveSheet
+            .Range("D" & i - 1).Value = "식별완료약물 : " & htmlEle.innerText & " 개"
+        End With
+        i = i + 1
+    Next htmlEle
+
+    Range("A1:C" & i - 2).Select
+    
+ieObj.Quit
+Set ieObj = Nothing
+End Sub
+
+
+
+
+Sub 성분열삭제()
+    Columns("B:B").Select
+    Selection.ClearContents
+    Columns("C:C").Select
+    Selection.Cut
+    Columns("B:B").Select
+    ActiveSheet.Paste
+    Range("A1").Select
+    Application.CutCopyMode = False
+End Sub
+
+Sub CLS()
+    Columns("A:D").Select
+    Selection.ClearContents
+    Range("A1").Select
+    Application.CutCopyMode = False
+End Sub
+
